@@ -1,0 +1,135 @@
+{
+  "generated": "2026-06-01 09:22",
+  "block_area_ha": 19616.02,
+  "seasons_mapped": 2,
+  "rabi_2025_26": {
+    "season": "Rabi 2025-26",
+    "window": "Nov 2025 - May 2026",
+    "method": "Supervised RF \u00b7 Sentinel-2",
+    "model_accuracy": 98.35,
+    "images_used": 89,
+    "classes": {
+      "Wheat": {
+        "area_ha": 17241.76,
+        "pct": 87.9,
+        "color": "#fbbf24",
+        "label": "Wheat (Rabi)"
+      },
+      "Spring_Maize": {
+        "area_ha": 2157.79,
+        "pct": 11.0,
+        "color": "#16a34a",
+        "label": "Spring Maize"
+      },
+      "Agroforestry": {
+        "area_ha": 216.47,
+        "pct": 1.1,
+        "color": "#064e3b",
+        "label": "Agroforestry"
+      }
+    }
+  },
+  "kharif_2025": {
+    "season": "Kharif 2025",
+    "window": "Jun 2025 - Nov 2025",
+    "method": "Supervised RF \u00b7 Sentinel-2 + SAR Fusion",
+    "model_accuracy": 91.94,
+    "s2_images_used": 89,
+    "sar_images_used": 32,
+    "classes": {
+      "Rice": {
+        "area_ha": 14736.42,
+        "pct": 75.1,
+        "color": "#22c55e",
+        "label": "Rice (Paddy)"
+      },
+      "Kharif_Maize": {
+        "area_ha": 4877.71,
+        "pct": 24.9,
+        "color": "#fb923c",
+        "label": "Kharif Maize"
+      },
+      "Agroforestry": {
+        "area_ha": 1.88,
+        "pct": 0.0,
+        "color": "#064e3b",
+        "label": "Agroforestry"
+      }
+    }
+  },
+  "cropping_rotation": [
+    {
+      "rotation": "Wheat \u2192 Rice",
+      "points": 75,
+      "pct": 54.3,
+      "area_est": 10654,
+      "color": "#22c55e",
+      "note": "Dominant Punjab rotation"
+    },
+    {
+      "rotation": "Wheat \u2192 Kharif Maize",
+      "points": 17,
+      "pct": 12.3,
+      "area_est": 2413,
+      "color": "#fb923c",
+      "note": "Water-scarce or dairy-farm plots"
+    },
+    {
+      "rotation": "Spring Maize \u2192 Kharif Maize",
+      "points": 12,
+      "pct": 8.7,
+      "area_est": 1707,
+      "color": "#f59e0b",
+      "note": "Continuous maize - silage/dairy"
+    },
+    {
+      "rotation": "Spring Maize \u2192 Rice",
+      "points": 7,
+      "pct": 5.1,
+      "area_est": 994,
+      "color": "#3b82f6",
+      "note": "Intensive cropping"
+    },
+    {
+      "rotation": "Other / Mixed",
+      "points": 27,
+      "pct": 19.6,
+      "area_est": 3849,
+      "color": "#94a3b8",
+      "note": "Vegetables, fodder, settlements"
+    }
+  ],
+  "events_tagged": 7,
+  "feature_importance_top5": [
+    {
+      "rank": 1,
+      "feature": "s2_prekharif_ndvi",
+      "importance": 36.74,
+      "meaning": "Pre-Kharif bare soil \u2014 rice fields bare, maize already growing"
+    },
+    {
+      "rank": 2,
+      "feature": "s2_flood_ndvi",
+      "importance": 20.42,
+      "meaning": "NDVI during flood window \u2014 rice transplanting period"
+    },
+    {
+      "rank": 3,
+      "feature": "s2_flood_ndwi",
+      "importance": 17.61,
+      "meaning": "Water index during flooding \u2014 standing water in rice fields"
+    },
+    {
+      "rank": 4,
+      "feature": "sar_peak_vhvv_ratio",
+      "importance": 14.28,
+      "meaning": "SAR cross-pol ratio at peak \u2014 rice stem structure vs maize leaves"
+    },
+    {
+      "rank": 5,
+      "feature": "s2_flood_mndwi",
+      "importance": 13.43,
+      "meaning": "SWIR water index \u2014 confirms flooded field condition"
+    }
+  ]
+}

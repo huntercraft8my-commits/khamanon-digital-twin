@@ -1,0 +1,8 @@
+date,event,confidence,signal,season,crop_class,area_ha,season_lulc,note,class_note
+2025-04-08,HARVESTING,HIGH,"NDVI=0.417 (30d peak=0.745, drop=-0.328)",Rabi,Wheat,17241.76,Rabi 2025-26,Crop cut — NDVI fell below 30-day peak,"Wheat harvested from 17,242 ha. Minor Spring Maize contribution (~2,158 ha)."
+2025-05-11,STUBBLE_BURNING,HIGH,NBR=-0.031 (was 0.070) — crossed zero,Rabi,Wheat (post-harvest),17241.76,Rabi 2025-26,Burn scar — NBR crossed from positive to negative,Residue burning on harvested wheat fields. NBR crossed from positive to negative.
+2025-07-25,RICE_TRANSPLANTING,HIGH,dNDVI=+0.309 | NDWI=-0.487,Kharif,Rice (transplanted),14736.42,Kharif 2025,Green shoots over fields — rice establishment confirmed,"Rice transplanted onto 14,736 ha of formerly harvested wheat ground."
+2025-10-15,HARVESTING,MEDIUM,"NDVI=0.403 (30d peak=0.647, drop=-0.243)",Kharif,Rice,14736.42,Kharif 2025,Crop cut — NDVI fell below 30-day peak,"Rice harvested from 14,736 ha. Kharif Maize (4,878 ha) harvested earlier."
+2025-10-30,STUBBLE_BURNING,MEDIUM,NBR=0.014 (was 0.073) — crossed zero,Kharif,Rice (post-harvest),14736.42,Kharif 2025,Burn scar — NBR crossed from positive to negative,Post-rice stubble burning. NBR sign change after rice harvest.
+2026-04-05,HARVESTING,HIGH,"NDVI=0.364 (30d peak=0.759, drop=-0.395)",Rabi,Wheat,17241.76,Rabi 2025-26,Crop cut — NDVI fell below 30-day peak,"Wheat harvested from 17,242 ha. Minor Spring Maize contribution (~2,158 ha)."
+2026-05-06,STUBBLE_BURNING,MEDIUM,NBR=0.012 (was 0.036) — crossed zero,Rabi,Wheat (post-harvest),17241.76,Rabi 2025-26,Burn scar — NBR crossed from positive to negative,Residue burning on harvested wheat fields. NBR crossed from positive to negative.

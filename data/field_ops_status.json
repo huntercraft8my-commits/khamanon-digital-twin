@@ -1,0 +1,11 @@
+{
+  "last_processed": "2026-05-28 18:50",
+  "latest_date": "2026-05-26",
+  "latest_NDVI": 0.268,
+  "latest_NDWI": -0.3352,
+  "latest_NBR": -0.0129,
+  "latest_BSI": 0.1151,
+  "total_images": 126,
+  "total_events": 7,
+  "current_phase": "POST_HARVEST_FALLOW"
+}

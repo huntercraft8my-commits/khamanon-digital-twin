@@ -1,0 +1,8 @@
+date,event,confidence,signal,NDVI_after,note
+2025-04-08,HARVESTING,HIGH,"NDVI=0.417 (30d peak=0.745, drop=-0.328)",0.4168,Crop cut — NDVI fell below 30-day peak
+2025-05-11,STUBBLE_BURNING,HIGH,NBR=-0.031 (was 0.070) — crossed zero,0.2658,Burn scar — NBR crossed from positive to negative
+2025-07-25,RICE_TRANSPLANTING,HIGH,dNDVI=+0.309 | NDWI=-0.487,0.565,Green shoots over fields — rice establishment confirmed
+2025-10-15,HARVESTING,MEDIUM,"NDVI=0.403 (30d peak=0.647, drop=-0.243)",0.4032,Crop cut — NDVI fell below 30-day peak
+2025-10-30,STUBBLE_BURNING,MEDIUM,NBR=0.014 (was 0.073) — crossed zero,0.2916,Burn scar — NBR crossed from positive to negative
+2026-04-05,HARVESTING,HIGH,"NDVI=0.364 (30d peak=0.759, drop=-0.395)",0.3644,Crop cut — NDVI fell below 30-day peak
+2026-05-06,STUBBLE_BURNING,MEDIUM,NBR=0.012 (was 0.036) — crossed zero,0.2515,Burn scar — NBR crossed from positive to negative
