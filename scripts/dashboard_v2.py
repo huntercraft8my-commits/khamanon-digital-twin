@@ -537,6 +537,24 @@ def render_page(tab, n):
         temp_col = (COLORS['danger']
                     if wx.get('temperature', 0) > 35
                     else COLORS['success'])
+import math as _math
+_T  = wx.get('temperature', 35)
+_RH = wx.get('humidity', 45)
+_es = 0.61078 * _math.exp((17.27 * _T) / (_T + 237.3))
+_ea = _es * (_RH / 100)
+vpd = round(_es - _ea, 2)
+vpd_label = (
+    'Low — good for crops'   if vpd < 0.5
+    else 'Moderate — monitor'    if vpd < 1.0
+    else 'High — stomatal stress' if vpd < 1.5
+    else 'Critical — growth halted'
+)
+vpd_col = (
+    COLORS['success'] if vpd < 0.5
+    else COLORS['accent']  if vpd < 1.0
+    else COLORS['warning'] if vpd < 1.5
+    else COLORS['danger']
+)
 
         cards = html.Div([
             html.Div([metric_card(
@@ -551,7 +569,7 @@ def render_page(tab, n):
             html.Div([metric_card(
                 'Temperature',
                 wx.get('temperature', '—'), '°C',
-                str(wx.get('description', '—')).title(),
+                str(wx.get('description', 'Loading...')).title(),
                 temp_col
             )], style={'flex': '1', 'marginRight': '12px'}),
             html.Div([metric_card(
@@ -562,7 +580,13 @@ def render_page(tab, n):
             html.Div([metric_card(
                 'Field Samples', len(soil), 'points',
                 'cLHS validated', COLORS['accent']
-            )], style={'flex': '1'})
+            )], style={'flex': '1'}),
+html.Div([metric_card(
+    'Atm. VPD',
+    vpd, 'kPa',
+    vpd_label,
+    vpd_col
+)], style={'flex': '1'}),
         ], style={'display': 'flex', 'flexWrap': 'wrap', 'gap': '12px', 'marginBottom': '20px'})
 
         soil_stats = html.Div([

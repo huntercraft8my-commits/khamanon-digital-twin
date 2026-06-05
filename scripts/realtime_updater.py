@@ -365,3 +365,51 @@ if needs_update:
         new_mean = grid_new[target].mean()
         print(f"  {target:<15}: "
               f"{old_mean:.3f} → {new_mean:.3f}")
+
+# ── WEATHER FETCH PIPELINE ──────────────────────────────────────
+import requests as _req
+import os as _os
+import json as _json
+
+def _fetch_weather():
+    # paste your alphanumeric API key inside the quotes below
+    OWM_KEY = "aad8b57ba2b85482fa8be2bbbed79489" 
+    
+    url = (
+        "https://api.openweathermap.org/data/2.5/weather"
+        f"?lat=30.795&lon=76.352&appid={OWM_KEY}&units=metric"
+    )
+    try:
+        r = _req.get(url, timeout=10)
+        d = r.json()
+        
+        # Check if the API key is active or unauthorized
+        if d.get("cod") != 200:
+            print(f"  Weather API Error: {d.get('message', 'Unknown Error')}")
+            return
+            
+        wx = {
+            "temperature" : round(d["main"]["temp"], 1),
+            "humidity"    : d["main"]["humidity"],
+            "description" : d["weather"][0]["description"],
+            "wind_speed"  : d["wind"]["speed"],
+            "rain_1h"     : d.get("rain", {}).get("1h", 0),
+            "advisories"  : []
+        }
+        
+        # Try to resolve folder path safely
+        try:
+            script_dir = _os.path.dirname(_os.path.abspath(__file__))
+        except NameError:
+            script_dir = _os.getcwd()
+            
+        wx_path = _os.path.join(script_dir, '..', 'data', 'current_weather.json')
+        
+        with open(wx_path, 'w') as f:
+            _json.dump(wx, f)
+            
+        print(f"  Success! Weather: {wx['temperature']}°C | {wx['description']} | RH {wx['humidity']}%")
+    except Exception as e:
+        print(f"  Weather fetch failed: {e}")
+
+_fetch_weather()
