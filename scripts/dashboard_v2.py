@@ -222,6 +222,69 @@ def alert_badge(text, severity):
 
 
 # ============================================
+# HELPER: SOIL RANGE DISTRIBUTION TIER
+# ============================================
+
+def _tier_row(grid, col, label, tiers):
+    """Stacked bar row showing % of grid points per PAU agronomic tier."""
+    if col not in grid.columns:
+        return html.Div()
+    n   = len(grid)
+    vals = grid[col]
+    segments, pills = [], []
+    for name, cond_fn, color in tiers:
+        pct = round(cond_fn(vals).sum() / n * 100, 1)
+        if pct > 0:
+            segments.append(html.Div(style={
+                'width'          : f'{pct}%',
+                'height'         : '9px',
+                'backgroundColor': color,
+                'display'        : 'inline-block',
+            }, title=f'{name}: {pct}%'))
+        pills.append(html.Span([
+            html.Span(style={
+                'display'        : 'inline-block',
+                'width'          : '7px',
+                'height'         : '7px',
+                'borderRadius'   : '2px',
+                'backgroundColor': color,
+                'marginRight'    : '3px',
+                'verticalAlign'  : 'middle',
+            }),
+            html.Span(f'{name}  {pct}%', style={
+                'fontSize'   : '10px',
+                'color'      : COLORS['text_muted'],
+                'marginRight': '10px',
+            })
+        ]))
+    return html.Div([
+        html.Div([
+            html.Span(label, style={
+                'color'      : COLORS['text_muted'],
+                'fontSize'   : '11px',
+                'fontWeight' : '600',
+                'width'      : '115px',
+                'flexShrink' : '0',
+                'display'    : 'inline-block',
+            }),
+            html.Div(segments, style={
+                'flex'           : '1',
+                'height'         : '9px',
+                'borderRadius'   : '5px',
+                'overflow'       : 'hidden',
+                'backgroundColor': COLORS['border'],
+                'display'        : 'flex',
+            }),
+        ], style={'display': 'flex', 'alignItems': 'center',
+                  'marginBottom': '4px'}),
+        html.Div(pills, style={
+            'paddingLeft': '115px',
+            'marginBottom': '12px',
+        }),
+    ])
+
+
+# ============================================
 # TAB STYLE HELPERS
 # ============================================
 
@@ -329,7 +392,7 @@ def _build_lulc_map(base_path):
 
 
 # ============================================
-# APP
+# APP INITIALIZATION
 # ============================================
 _lulc_map_cache = _build_lulc_map(base)
 app = Dash(__name__, suppress_callback_exceptions=True)
@@ -426,7 +489,6 @@ app.layout = html.Div([
 def update_nav(n):
     _, _, _, _, st, wx, _, _, _, _ = load_all()
     ndvi      = st.get('ndvi_mean', 0)
-    ndvi_col  = COLORS['danger'] if ndvi < 0.35 else COLORS['success']
     status_col = COLORS['success'] if st.get('status') == 'SUCCESS' else COLORS['warning']
     return html.Div([
         html.Div([
@@ -477,10 +539,10 @@ def render_page(tab, n):
         _ea  = _es * (_RH / 100)
         vpd  = round(_es - _ea, 2)
         vpd_label = (
-            'Low - good for crops'     if vpd < 0.5
-            else 'Moderate - monitor'      if vpd < 1.0
-            else 'High - stomatal stress'  if vpd < 1.5
-            else 'Critical - growth halted'
+            'Low — good for crops'     if vpd < 0.5
+            else 'Moderate — monitor'      if vpd < 1.0
+            else 'High — stomatal stress'  if vpd < 1.5
+            else 'Critical — growth halted'
         )
         vpd_col = (
             COLORS['success'] if vpd < 0.5
@@ -524,33 +586,42 @@ def render_page(tab, n):
 
         soil_stats = html.Div([
             html.Div([
-                html.Div('Block Soil Profile', style={
+                html.Div('Soil Fertility Tier Distribution', style={
                     'color': COLORS['text'], 'fontSize': '14px',
-                    'fontWeight': '600', 'marginBottom': '15px'
+                    'fontWeight': '600', 'marginBottom': '4px'
                 }),
+                html.Div(
+                    f'PAU thresholds  ·  {len(grid):,} prediction points  ·  10m grid',
+                    style={'color': COLORS['text_muted'], 'fontSize': '11px',
+                           'marginBottom': '16px'}
+                ),
                 html.Div([
-                    html.Div([
-                        html.Div([
-                            html.Span(
-                                col.replace('_', ' ').title(),
-                                style={'color': COLORS['text_muted'], 'fontSize': '11px'}
-                            ),
-                            html.Span(
-                                f"{soil[col].mean():.2f}",
-                                style={'color': COLORS['accent'], 'fontWeight': '700',
-                                       'fontSize': '16px', 'float': 'right'}
-                            )
-                        ], style={
-                            'display': 'flex', 'justifyContent': 'space-between',
-                            'alignItems': 'center', 'marginBottom': '8px',
-                            'paddingBottom': '8px',
-                            'borderBottom': f"1px solid {COLORS['border']}"
-                        })
-                    ])
-                    for col in ['pH', 'OC', 'EC', 'available_N',
-                                'available_P', 'K2O', 'CEC']
+                    _tier_row(grid, 'pH', 'Soil pH',
+                        [('Optimal 6.5–7.8', lambda x: (x>=6.5)&(x<=7.8), COLORS['success']),
+                         ('Alkaline >7.8',   lambda x: x > 7.8,            COLORS['danger']),
+                         ('Acidic <6.5',     lambda x: x < 6.5,            '#3b82f6')]),
+                    _tier_row(grid, 'OC', 'Organic Carbon',
+                        [('Critical <0.40%',  lambda x: x < 0.40,               COLORS['danger']),
+                         ('Optimum 0.40–0.75%', lambda x: (x>=0.40)&(x<=0.75), COLORS['success']),
+                         ('High >0.75%',      lambda x: x > 0.75,               '#3b82f6')]),
+                    _tier_row(grid, 'available_N', 'Available N',
+                        [('Deficient <280',  lambda x: x < 280,              COLORS['danger']),
+                         ('Optimum 280–560', lambda x: (x>=280)&(x<=560),   COLORS['success']),
+                         ('Excess >560',     lambda x: x > 560,              COLORS['warning'])]),
+                    _tier_row(grid, 'available_P', 'Available P',
+                        [('Deficient <11',     lambda x: x < 11,             COLORS['danger']),
+                         ('Optimum 11–35',     lambda x: (x>=11)&(x<=35),   COLORS['success']),
+                         ('Excess/Locked >35', lambda x: x > 35,             COLORS['warning'])]),
+                    _tier_row(grid, 'K2O', 'K₂O',
+                        [('Deficient <55',  lambda x: x < 55,               COLORS['danger']),
+                         ('Optimum 55–110', lambda x: (x>=55)&(x<=110),    COLORS['success']),
+                         ('High >110',      lambda x: x > 110,              '#3b82f6')]),
+                    _tier_row(grid, 'EC', 'EC Salinity',
+                        [('Safe <0.25',       lambda x: x < 0.25,            COLORS['success']),
+                         ('Marginal 0.25–0.75', lambda x: (x>=0.25)&(x<=0.75), COLORS['warning']),
+                         ('Saline >0.75',    lambda x: x > 0.75,             COLORS['danger'])]),
                 ])
-            ], style={**CARD_STYLE, 'flex': '1', 'marginRight': '16px'}),
+            ], style={**CARD_STYLE, 'flex': '1.3', 'marginRight': '16px'}),
 
             html.Div([
                 html.Div('Risk Assessment', style={
@@ -1332,7 +1403,7 @@ def render_page(tab, n):
             margin=dict(l=50, r=30, t=60, b=60), font=dict(color=COLORS['text'])
         )
         fig_compare.update_yaxes(title_text='Area (ha)',
-                                  gridcolor='rgba(255,255,255,0.05)')
+                                 gridcolor='rgba(255,255,255,0.05)')
         fig_compare.update_xaxes(tickfont=dict(size=11))
 
         rot      = lulc['cropping_rotation']
@@ -1379,9 +1450,9 @@ def render_page(tab, n):
         ev_rows = []
         if not ev_t.empty:
             for _, erow in ev_t.iterrows():
-                cc  = CLASS_COLOR_MAP.get(str(erow.get('crop_class', '')), COLORS['text_muted'])
+                cc   = CLASS_COLOR_MAP.get(str(erow.get('crop_class', '')), COLORS['text_muted'])
                 cfr = COLORS['success'] if erow.get('confidence') == 'HIGH' else COLORS['warning']
-                ei  = EV_ICON_MAP.get(str(erow.get('event', '')), '')
+                ei   = EV_ICON_MAP.get(str(erow.get('event', '')), '')
                 ev_rows.append(html.Tr([
                     html.Td(str(erow.get('date', '')),
                             style={'color': COLORS['text_muted'], 'padding': '10px 14px',
@@ -1602,7 +1673,7 @@ def update_map(prop, n):
 
 
 # ============================================
-# RUN
+# RUN EXECUTION
 # ============================================
 
 server = app.server  # required for Render/gunicorn
