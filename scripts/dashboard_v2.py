@@ -14,6 +14,11 @@ import json
 import os
 import math
 from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import timedelta
+import subprocess
+import atexit
+import sys
 
 print("=" * 55)
 print("  DASHBOARD v2.0 — PROFESSIONAL REDESIGN")
@@ -414,7 +419,48 @@ def _build_lulc_map(base_path):
 # ============================================
 _lulc_map_cache = _build_lulc_map(base)
 app = Dash(__name__, suppress_callback_exceptions=True)
+# ============================================
+# BACKGROUND SCHEDULER — 24-HOUR AUTO-UPDATE
+# ============================================
 
+def _run_updater_job():
+    """Runs realtime_updater.py inside a protected secondary processing thread."""
+    updater = os.path.join(base, 'realtime_updater.py')
+    if not os.path.exists(updater):
+        print("[Scheduler] Target file realtime_updater.py missing — task aborted")
+        return
+    try:
+        print(f"[Scheduler] Booting automated tracking run — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        result = subprocess.run(
+            [sys.executable, updater],
+            capture_output=True,
+            text=True,
+            timeout=480       # Hard safety timeout after 8 minutes
+        )
+        if result.returncode == 0:
+            print("[Scheduler] Automated sync completed successfully")
+        else:
+            print(f"[Scheduler] Execution fault signature found. Exit Code: {result.returncode}")
+        if result.stdout:
+            print("[Scheduler] Engine stdout output:", result.stdout[-600:])
+        if result.stderr:
+            print("[Scheduler] Engine error traces:", result.stderr[-300:])
+    except subprocess.TimeoutExpired:
+        print("[Scheduler] Extraction routine timed out after 8 minutes limit boundary")
+    except Exception as e:
+        print(f"[Scheduler] Internal tracking error: {e}")
+
+_scheduler = BackgroundScheduler(job_defaults={'max_instances': 1, 'misfire_grace_time': 3600})
+_scheduler.add_job(
+    _run_updater_job,
+    trigger='interval',
+    hours=24,
+    id='daily_pipeline',
+    next_run_time=datetime.now() + timedelta(minutes=3)  # Fires 3 minutes post-boot, then cycles every 24h
+)
+_scheduler.start()
+atexit.register(lambda: _scheduler.shutdown(wait=False))
+print("[Scheduler] Thread initialization complete. Scheduled loop: 24h intervals (Warmup: 3min)")
 app.layout = html.Div([
 
     dcc.Interval(id='refresh', interval=30 * 1000, n_intervals=0),

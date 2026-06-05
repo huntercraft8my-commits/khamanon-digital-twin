@@ -6,3 +6,4 @@ scikit-learn
 joblib
 gunicorn
 pyproj
+apscheduler==3.10.4

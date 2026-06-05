@@ -22,7 +22,23 @@ print("=" * 55)
 # ============================================
 
 print("\nConnecting to Google Earth Engine...")
-ee.Initialize(project='optimum-archery-387602')
+import os as _os
+import json as _json
+
+_gee_creds = _os.environ.get('GEE_CREDENTIALS')
+if _gee_creds:
+    # Running on Render Cloud Container — use Service Account JSON Key Environment Variable
+    _key = _json.loads(_gee_creds)
+    _credentials = ee.ServiceAccountCredentials(
+        email=_key['client_email'],
+        key_data=_key['private_key']
+    )
+    ee.Initialize(_credentials, project='optimum-archery-387602')
+    print("  GEE: Authenticated via service account key (Render Cloud Environment)")
+else:
+    # Running locally on your desktop machine — fallback to your standard system user credentials profile
+    ee.Initialize(project='optimum-archery-387602')
+    print("  GEE: Authenticated via local system credentials profile")
 print("Connected.")
 
 # ============================================
