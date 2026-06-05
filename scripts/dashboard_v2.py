@@ -156,9 +156,11 @@ def load_all():
            if os.path.exists(hist_path) \
            else pd.DataFrame()
 
-    return (soil, grid, ndvi, val,
-            st, wx, adv, risk, shap, hist)
+    sat_log_path = os.path.join(base,'..','data','satellite_log.csv')
+    sat_log = pd.read_csv(sat_log_path) if os.path.exists(sat_log_path) else pd.DataFrame()
 
+    return (soil, grid, ndvi, val,
+            st, wx, adv, risk, shap, hist, sat_log)
 
 # ============================================
 # HELPER: METRIC CARD
@@ -220,6 +222,22 @@ def alert_badge(text, severity):
         'fontWeight'     : '500'
     })
 
+
+def _sat_status_badge(status):
+    cfg = {
+        'ACCEPTED': (COLORS['success'], '#1b2d25', '✓ ACCEPTED'),
+        'REJECTED': (COLORS['danger'],  '#2d1b1b', '✗ REJECTED'),
+    }
+    fc, bg, label = cfg.get(status, (COLORS['text_muted'], COLORS['card'], status))
+    return html.Span(label, style={
+        'backgroundColor': bg,
+        'color'          : fc,
+        'border'         : f'1px solid {fc}',
+        'borderRadius'   : '4px',
+        'padding'        : '2px 8px',
+        'fontSize'       : '11px',
+        'fontWeight'     : '600',
+    })
 
 # ============================================
 # HELPER: SOIL RANGE DISTRIBUTION TIER
@@ -487,7 +505,7 @@ app.layout = html.Div([
     Input('refresh', 'n_intervals')
 )
 def update_nav(n):
-    _, _, _, _, st, wx, _, _, _, _ = load_all()
+    _, _, _, _, st, wx, _, _, _, _, sat_log = load_all()
     ndvi      = st.get('ndvi_mean', 0)
     status_col = COLORS['success'] if st.get('status') == 'SUCCESS' else COLORS['warning']
     return html.Div([
@@ -516,7 +534,7 @@ def update_nav(n):
 )
 def render_page(tab, n):
     (soil, grid, ndvi_df, val,
-     st, wx, adv, risk, shap, hist) = load_all()
+     st, wx, adv, risk, shap, hist, sat_log) = load_all()
 
     ndvi_mean = st.get('ndvi_mean', 0)
     s2_date   = st.get('sentinel2_date', '—')
@@ -733,7 +751,75 @@ def render_page(tab, n):
             cards, soil_stats,
             html.Div([
                 dcc.Graph(figure=fig_ndvi, style={'height': '280px'})
-            ], style=CARD_STYLE)
+            ], style=CARD_STYLE),
+
+            # ── SATELLITE ACQUISITION LOG TABLE ─────────────────────────
+            html.Div([
+                html.Div([
+                    html.Span('🛰 Sentinel-2 Acquisition Log', style={
+                        'color': COLORS['text'], 'fontSize': '14px',
+                        'fontWeight': '600'
+                    }),
+                    html.Span(
+                        f'  ·  Last 30 days  ·  '
+                        f'QA: Rabi <25% cloud  |  Kharif <50% cloud  ·  '
+                        f'{len(sat_log)} orbital passes',
+                        style={'color': COLORS['text_muted'], 'fontSize': '11px'}
+                    ),
+                ], style={'marginBottom': '14px'}),
+
+                html.Table([
+                    html.Thead(html.Tr([
+                        html.Th(h, style={
+                            'color'        : COLORS['text_muted'],
+                            'fontSize'     : '11px',
+                            'textTransform': 'uppercase',
+                            'letterSpacing': '1px',
+                            'padding'      : '8px 14px',
+                            'textAlign'    : 'left',
+                            'borderBottom' : f"1px solid {COLORS['border']}"
+                        }) for h in ['Date', 'Satellite', 'Cloud Cover', 'Season', 'Status', 'Action']
+                    ])),
+                    html.Tbody([
+                        html.Tr([
+                            html.Td(row['date'],
+                                    style={'color': COLORS['text_muted'],
+                                           'padding': '8px 14px', 'fontSize': '12px',
+                                           'whiteSpace': 'nowrap'}),
+                            html.Td(row['satellite'],
+                                    style={'color': COLORS['text'],
+                                           'padding': '8px 14px', 'fontSize': '12px'}),
+                            html.Td(
+                                html.Span(f"{row['cloud_pct']}%", style={
+                                    'color': (COLORS['danger'] if row['cloud_pct'] > row['threshold'] else COLORS['success']),
+                                    'fontWeight': '600', 'fontSize': '12px'
+                                }),
+                                style={'padding': '8px 14px'}
+                            ),
+                            html.Td(row['season'],
+                                    style={'color': COLORS['text_muted'],
+                                           'padding': '8px 14px', 'fontSize': '12px'}),
+                            html.Td(_sat_status_badge(row['status']),
+                                    style={'padding': '8px 14px'}),
+                            html.Td(row['action'],
+                                    style={'color': COLORS['text_muted'],
+                                           'padding': '8px 14px', 'fontSize': '11px'}),
+                        ], style={
+                            'borderBottom': f"1px solid {COLORS['border']}",
+                            'backgroundColor': ('rgba(239,68,68,0.04)' if row['status'] == 'REJECTED' else 'transparent')
+                        })
+                        for _, row in sat_log.sort_values('date', ascending=False).head(25).iterrows()
+                    ] if not sat_log.empty else [
+                        html.Tr([html.Td(
+                            'Run realtime_updater.py to populate log.',
+                            colSpan=6,
+                            style={'color': COLORS['text_muted'],
+                                   'padding': '16px 14px', 'fontSize': '12px'}
+                        )])
+                    ])
+                ], style={'width': '100%', 'borderCollapse': 'collapse'})
+
+            ], style={**CARD_STYLE, 'marginTop': '20px'}),
         ])
 
     # ==========================================

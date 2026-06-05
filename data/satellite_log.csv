@@ -1,0 +1,32 @@
+date,satellite,cloud_pct,status,season,threshold,action
+2026-05-06,Sentinel-2C,0.2,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-06,Sentinel-2C,0.1,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-08,Sentinel-2B,70.6,REJECTED,Rabi,25,Skipped — cloud cover 70.6% exceeds 25% Rabi QA threshold
+2026-05-08,Sentinel-2B,6.1,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-11,Sentinel-2B,45.9,REJECTED,Rabi,25,Skipped — cloud cover 45.9% exceeds 25% Rabi QA threshold
+2026-05-11,Sentinel-2B,19.7,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-13,Sentinel-2C,14.3,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-13,Sentinel-2C,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-15,Sentinel-2A,3.5,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-15,Sentinel-2A,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-16,Sentinel-2C,0.1,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-16,Sentinel-2C,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-18,Sentinel-2B,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-18,Sentinel-2B,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-18,Sentinel-2A,0.1,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-18,Sentinel-2A,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-18,Sentinel-2A,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-21,Sentinel-2B,6.4,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-21,Sentinel-2B,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-23,Sentinel-2C,17.9,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-23,Sentinel-2C,77.5,REJECTED,Rabi,25,Skipped — cloud cover 77.5% exceeds 25% Rabi QA threshold
+2026-05-26,Sentinel-2C,0.3,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-26,Sentinel-2C,0.0,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-28,Sentinel-2B,21.3,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-28,Sentinel-2B,0.5,ACCEPTED,Rabi,25,Used in composite — NDVI extracted at 208 points
+2026-05-31,Sentinel-2B,38.3,REJECTED,Rabi,25,Skipped — cloud cover 38.3% exceeds 25% Rabi QA threshold
+2026-05-31,Sentinel-2B,25.8,REJECTED,Rabi,25,Skipped — cloud cover 25.8% exceeds 25% Rabi QA threshold
+2026-06-02,Sentinel-2C,1.8,ACCEPTED,Kharif,50,Used in composite — NDVI extracted at 208 points
+2026-06-02,Sentinel-2C,2.5,ACCEPTED,Kharif,50,Used in composite — NDVI extracted at 208 points
+2026-06-04,Sentinel-2A,8.8,ACCEPTED,Kharif,50,Used in composite — NDVI extracted at 208 points
+2026-06-04,Sentinel-2A,5.0,ACCEPTED,Kharif,50,Used in composite — NDVI extracted at 208 points

@@ -67,6 +67,59 @@ days_back = 30
 start     = (today - timedelta(days=days_back)
              ).strftime('%Y-%m-%d')
 end       = today.strftime('%Y-%m-%d')
+# ── SATELLITE ACQUISITION LOG ─────────────────────────────────────
+print("  Building satellite acquisition log...")
+
+all_passes = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+              .filterBounds(khamanon)
+              .filterDate(start, end)
+              .sort('system:time_start'))
+
+try:
+    ts_list  = all_passes.aggregate_array('system:time_start').getInfo()
+    cc_list  = all_passes.aggregate_array('CLOUDY_PIXEL_PERCENTAGE').getInfo()
+    sat_list = all_passes.aggregate_array('SPACECRAFT_NAME').getInfo()
+
+    log_rows = []
+    for ts, cc, sat in zip(ts_list, cc_list, sat_list):
+        dt     = datetime.utcfromtimestamp(ts / 1000)
+        date_s = dt.strftime('%Y-%m-%d')
+        month  = dt.month
+        cc     = round(cc or 0, 1)
+
+        if 6 <= month <= 10:
+            season, threshold = 'Kharif', 50
+        else:
+            season, threshold = 'Rabi', 25
+
+        if cc <= threshold:
+            status = 'ACCEPTED'
+            action = f'Used in composite — NDVI extracted at 208 points'
+        else:
+            status = 'REJECTED'
+            action = (f'Skipped — cloud cover {cc}% exceeds '
+                      f'{threshold}% {season} QA threshold')
+
+        log_rows.append({
+            'date'      : date_s,
+            'satellite' : sat or 'Sentinel-2',
+            'cloud_pct' : cc,
+            'status'    : status,
+            'season'    : season,
+            'threshold' : threshold,
+            'action'    : action
+        })
+
+    log_df   = pd.DataFrame(log_rows)
+    log_path = os.path.join(base, '..', 'data', 'satellite_log.csv')
+    log_df.to_csv(log_path, index=False)
+    accepted = (log_df['status'] == 'ACCEPTED').sum()
+    rejected = (log_df['status'] == 'REJECTED').sum()
+    print(f"  Sat log: {len(log_rows)} passes — "
+          f"{accepted} accepted, {rejected} rejected → satellite_log.csv")
+
+except Exception as e:
+    print(f"  Sat log failed: {e}")
 
 s2_recent = ee.ImageCollection(
     'COPERNICUS/S2_SR_HARMONIZED'
