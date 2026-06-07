@@ -80,6 +80,10 @@ EV_LABEL = {
     'PLOUGHING'         : 'Ploughing',
 }
 
+# ============================================
+# FIELD OPS ICONS & CONFIG
+# ============================================
+
 EV_ICON = {
     'HARVESTING'        : '🌾',
     'STUBBLE_BURNING'   : '🔥',
@@ -97,7 +101,7 @@ EV_YPOS = {
 }
 
 # ============================================
-# DATA LOADER — returns 12 items
+# DATA LOADER — returns 14 items
 # ============================================
 
 def load_all():
@@ -125,8 +129,7 @@ def load_all():
     risk = pd.read_csv(risk_path) if os.path.exists(risk_path) else pd.DataFrame()
 
     shap_path = os.path.join(base,'..','data','shap_importance.csv')
-    shap = pd.read_csv(shap_path, index_col='soil_property') \
-           if os.path.exists(shap_path) else pd.DataFrame()
+    shap = pd.read_csv(shap_path, index_col='soil_property') if os.path.exists(shap_path) else pd.DataFrame()
 
     hist_path = os.path.join(base,'..','data','update_history.csv')
     hist = pd.read_csv(hist_path) if os.path.exists(hist_path) else pd.DataFrame()
@@ -137,7 +140,14 @@ def load_all():
     lulc_ndvi_path = os.path.join(base,'..','data','ndvi_by_lulc_class.csv')
     lulc_ndvi = pd.read_csv(lulc_ndvi_path) if os.path.exists(lulc_ndvi_path) else pd.DataFrame()
 
-    return (soil, grid, ndvi, val, st, wx, adv, risk, shap, hist, sat_log, lulc_ndvi)
+    # Extraction Paths For New Multi-Sensor Correlation Architecture
+    corr_r_path = os.path.join(base, '..', 'data', 'soil_spectral_corr_r.csv')
+    corr_r = pd.read_csv(corr_r_path, index_col=0) if os.path.exists(corr_r_path) else pd.DataFrame()
+
+    residuals_path = os.path.join(base, '..', 'data', 'soil_spectral_residuals.csv')
+    residuals = pd.read_csv(residuals_path) if os.path.exists(residuals_path) else pd.DataFrame()
+
+    return (soil, grid, ndvi, val, st, wx, adv, risk, shap, hist, sat_log, lulc_ndvi, corr_r, residuals)
 
 
 # ============================================
@@ -403,6 +413,10 @@ app.layout = html.Div([
             dcc.Tab(label='🗺 Land Cover', value='landcover',
                     style={**tab_style(),'borderTop':f"2px solid {COLORS['success']}"},
                     selected_style={**tab_selected_style(),'color':COLORS['success'],'borderBottom':f"2px solid {COLORS['success']}"}),
+
+            dcc.Tab(label='🔬 Soil-Satellite', value='correlation',
+                    style={**tab_style(), 'borderTop': f"2px solid {COLORS['accent2']}"},
+                    selected_style={**tab_selected_style(), 'color': COLORS['accent2'], 'borderBottom': f"2px solid {COLORS['accent2']}"}),
         ], style={
             'backgroundColor':COLORS['primary'],
             'borderBottom':f"1px solid {COLORS['border']}",
@@ -423,7 +437,8 @@ app.layout = html.Div([
 
 @callback(Output('nav-status','children'), Input('refresh','n_intervals'))
 def update_nav(n):
-    _, _, _, _, st, wx, _, _, _, _, _, _ = load_all()
+    # Mandatory Unpack Target Verification: Exactly 14 mapping structures defined
+    _, _, _, _, st, wx, _, _, _, _, _, _, _, _ = load_all()
     ndvi      = st.get('ndvi_mean', 0)
     status_col = COLORS['success'] if st.get('status') == 'SUCCESS' else COLORS['warning']
     return html.Div([
@@ -448,7 +463,8 @@ def update_nav(n):
     Input('refresh','n_intervals')
 )
 def render_page(tab, n):
-    (soil, grid, ndvi_df, val, st, wx, adv, risk, shap, hist, sat_log, lulc_ndvi) = load_all()
+    # Mandatory Unpack Target Verification: Exactly 14 mapping structures defined
+    (soil, grid, ndvi_df, val, st, wx, adv, risk, shap, hist, sat_log, lulc_ndvi, corr_r, residuals) = load_all()
     ndvi_mean = st.get('ndvi_mean', 0)
     s2_date   = st.get('sentinel2_date', '—')
     zones     = [c for c in ndvi_df.columns if c != 'month']
@@ -509,8 +525,8 @@ def render_page(tab, n):
                          ('Acidic <6.5',     lambda x: x<6.5,             '#3b82f6')]),
                     _tier_row(grid,'OC','Organic Carbon',
                         [('Critical <0.40%',    lambda x: x<0.40,               COLORS['danger']),
-                         ('Optimum 0.40-0.75%', lambda x:(x>=0.40)&(x<=0.75),  COLORS['success']),
-                         ('High >0.75%',        lambda x: x>0.75,              '#3b82f6')]),
+                         ('Optimum 0.40-0.75%', lambda x:(x>=0.40)&(x<=0.75),   COLORS['success']),
+                         ('High >0.75%',        lambda x: x>0.75,               '#3b82f6')]),
                     _tier_row(grid,'available_N','Available N',
                         [('Deficient <280',  lambda x: x<280,             COLORS['danger']),
                          ('Optimum 280-560', lambda x:(x>=280)&(x<=560), COLORS['success']),
@@ -525,7 +541,7 @@ def render_page(tab, n):
                          ('High >110',      lambda x: x>110,            '#3b82f6')]),
                     _tier_row(grid,'EC','EC Salinity',
                         [('Safe <0.25',          lambda x: x<0.25,               COLORS['success']),
-                         ('Marginal 0.25-0.75',  lambda x:(x>=0.25)&(x<=0.75),  COLORS['warning']),
+                         ('Marginal 0.25-0.75',  lambda x:(x>=0.25)&(x<=0.75),   COLORS['warning']),
                          ('Saline >0.75',        lambda x: x>0.75,               COLORS['danger'])]),
                 ])
             ], style={**CARD_STYLE,'flex':'1.3','marginRight':'16px'}),
@@ -1231,6 +1247,176 @@ def render_page(tab, n):
             ], style={**CARD_STYLE,'marginTop':'20px'}),
         ])
 
+    # =====================================================================
+    # NEW TAB SYSTEM BLOCK — SOIL SATELLITE INTERACTION LAYER
+    # =====================================================================
+    elif tab == 'correlation':
+
+        # Section 1: Clean Executive Title Banner
+        header = html.Div([
+            html.Div("Soil–Satellite Correlation Analysis",
+                     style={'fontSize': '20px', 'fontWeight': '700', 'color': COLORS['text'], 'marginBottom': '6px'}),
+            html.Div("208 cLHS validation checkpoints · Wheat-stratified grids · Spearman rank engine · Sentinel-2 Rabi 2025-26",
+                     style={'fontSize': '12px', 'color': COLORS['text_muted'], 'marginBottom': '20px'})
+        ])
+
+        # Section 2: Compulsory Evaluation Integrity Disclaimer
+        disclaimer = html.Div([
+            html.Span("⚠️ Technical Prototype Footnote: ", style={'fontWeight': '700'}),
+            "Current statistical representations evaluate synthetic calibration models. "
+            "All computed tracking matrices, interactive charts, and point distributions serve as structural placeholders. "
+            "Calculated trends resolve to true physical agronomic profiles automatically upon loading official PAU laboratory records "
+            "and executing matching coordinate re-extractions."
+        ], style={**CARD_STYLE, 'borderLeft': f"4px solid {COLORS['warning']}", 'marginBottom': '20px',
+                  'color': COLORS['warning'], 'fontSize': '12px', 'lineHeight': '1.7'})
+
+        # Section 3: Primary Matrix Cross-Correlation Matrix Render Engine
+        if not corr_r.empty:
+            SOIL_LABELS = {
+                'pH':'pH', 'OC':'Organic Carbon', 'EC':'EC Salinity', 'K2O':'K2O',
+                'available_P':'Available P', 'available_N':'Available N', 'CEC':'CEC',
+                'bulk_density':'Bulk Density', 'CaCO3':'CaCO3'
+            }
+            y_axis_text = [SOIL_LABELS.get(idx, idx) for idx in corr_r.index]
+
+            fig_hm = go.Figure(go.Heatmap(
+                z=corr_r.values,
+                x=['NDVI', 'NDBI', 'SAVI', 'BSI'],
+                y=y_axis_text,
+                colorscale='RdBu', zmid=0, zmin=-1, zmax=1,
+                text=[[f"{val:.2f}" for val in row] for row in corr_r.values],
+                texttemplate="%{text}",
+                textfont=dict(size=12, color=COLORS['text'], weight='bold'),
+                showscale=True,
+                colorbar=dict(
+                    title=dict(text='Spearman R', font=dict(color=COLORS['text'], size=11)),
+                    tickfont=dict(color=COLORS['text'], size=10), thickness=14
+                )
+            ))
+            fig_hm.update_layout(
+                template='plotly_dark', paper_bgcolor=COLORS['card'], plot_bgcolor=COLORS['card'],
+                height=380, margin=dict(l=160, r=40, t=60, b=40),
+                title=dict(text='Spearman R Coefficient Matrix (Wheat Footprints Isolated)',
+                           font=dict(size=13, color=COLORS['text'])),
+                xaxis=dict(tickfont=dict(color=COLORS['text_muted'], size=12), side='bottom'),
+                yaxis=dict(tickfont=dict(color=COLORS['text_muted'], size=11), autorange='reversed')
+            )
+            heatmap_block = html.Div([dcc.Graph(figure=fig_hm, config={'displayModeBar': False})],
+                                     style={**CARD_STYLE, 'marginBottom': '20px'})
+        else:
+            heatmap_block = html.Div("Execute scripts/soil_spectral_correlation.py to assemble correlation matrices.",
+                                     style={**CARD_STYLE, 'color': COLORS['text_muted'], 'fontSize': '13px', 'marginBottom': '20px'})
+
+        # Section 4: Dynamic Interactive Validation Scatters
+        SOIL_COLS = ['pH', 'OC', 'EC', 'K2O', 'available_P', 'available_N', 'CEC', 'bulk_density', 'CaCO3']
+        SPECTRAL_COLS = ['NDVI', 'NDBI', 'SAVI', 'BSI']
+
+        selectors_card = html.Div([
+            html.Div([
+                html.Div([
+                    html.Label("Target Soil Attribute",
+                               style={'color': COLORS['text_muted'], 'fontSize': '11px', 'fontWeight': '600',
+                                      'textTransform': 'uppercase', 'letterSpacing': '0.8px', 'display': 'block', 'marginBottom': '8px'}),
+                    dcc.Dropdown(
+                        id='corr-soil-drop',
+                        options=[{'label': col.replace('_', ' ').title(), 'value': col} for col in SOIL_COLS],
+                        value='OC', clearable=False,
+                        style={'width': '260px', 'backgroundColor': COLORS['card'], 'color': COLORS['text'],
+                               'border': f"1px solid {COLORS['border']}", 'borderRadius': '8px'}
+                    )
+                ], style={'display': 'inline-block', 'marginRight': '24px'}),
+
+                html.Div([
+                    html.Label("Satellite Spectral Index",
+                               style={'color': COLORS['text_muted'], 'fontSize': '11px', 'fontWeight': '600',
+                                      'textTransform': 'uppercase', 'letterSpacing': '0.8px', 'display': 'block', 'marginBottom': '8px'}),
+                    dcc.Dropdown(
+                        id='corr-spec-drop',
+                        options=[{'label': col, 'value': col} for col in SPECTRAL_COLS],
+                        value='NDVI', clearable=False,
+                        style={'width': '200px', 'backgroundColor': COLORS['card'], 'color': COLORS['text'],
+                               'border': f"1px solid {COLORS['border']}", 'borderRadius': '8px'}
+                    )
+                ], style={'display': 'inline-block'})
+            ], style={'display': 'flex', 'alignItems': 'flex-end'})
+        ], style={**CARD_STYLE, 'marginBottom': '16px', 'display': 'inline-block'})
+
+        chart_container = html.Div([
+            dcc.Graph(id='corr-scatter-chart', style={'height': '360px'})
+        ], style={**CARD_STYLE, 'marginBottom': '20px'})
+
+        # Section 5: Geographical Spatial Interpretation Maps
+        # Left Panel Sub-Module: Multi-Parameter Extraction Bubble Map
+        if not residuals.empty and all(k in residuals.columns for k in ['latitude', 'longitude', 'OC', 'NDVI']):
+            n_val = residuals['NDVI']
+            # Mandatory Check 3: Map scale ranges to clear bounds, safeguarding resolution clipping
+            bubble_sizes = 8 + 14 * (n_val - n_val.min()) / (n_val.max() - n_val.min() + 1e-9)
+
+            fig_bub = go.Figure(go.Scattermap(
+                lat=residuals['latitude'], lon=residuals['longitude'], mode='markers',
+                marker=dict(
+                    size=bubble_sizes, color=residuals['OC'], colorscale='YlGn', showscale=True, opacity=0.88,
+                    colorbar=dict(title=dict(text='OC %', font=dict(color=COLORS['text'], size=10)),
+                                  tickfont=dict(color=COLORS['text'], size=9), thickness=12)
+                ),
+                hovertemplate="<b>OC Footprint: %{marker.color:.3f}%</b><br>NDVI: Scaled to Size<br>Lat: %{lat:.4f}<br>Lon: %{lon:.4f}<extra></extra>"
+            ))
+            fig_bub.update_layout(
+                map=dict(style='dark', center=dict(lat=30.795, lon=76.352), zoom=10.5),
+                paper_bgcolor=COLORS['card'], margin=dict(l=0, r=0, t=0, b=0), height=500
+            )
+            left_map_plot = dcc.Graph(figure=fig_bub, config={'displayModeBar': True})
+        else:
+            left_map_plot = html.Div("Awaiting execution pipeline compilation to populate spatial bubble vectors.",
+                                     style={'color': COLORS['text_muted'], 'fontSize': '13px', 'padding': '40px 20px', 'textAlign': 'center'})
+
+        left_map_layout = html.Div([
+            html.Div("Bubble Map — Attribute Cross-Examination Pattern",
+                     style={'color': COLORS['text'], 'fontSize': '14px', 'fontWeight': '600', 'marginBottom': '4px'}),
+            html.Div("Bubble Size maps canopy vigor (NDVI)  |  Color space tracks Organic Carbon percentage",
+                     style={'color': COLORS['text_muted'], 'fontSize': '11px', 'marginBottom': '12px'}),
+            left_map_plot
+        ], style={**CARD_STYLE, 'flex': '1', 'marginRight': '16px'})
+
+        # Right Panel Sub-Module: Clean Variance Residual Map
+        if not residuals.empty and 'residual' in residuals.columns:
+            # Mandatory Check 2: Dynamic self-scaling mapping preserving variance geometry symmetric balance
+            absolute_ceiling = residuals['residual'].abs().max()
+            if absolute_ceiling == 0:
+                absolute_ceiling = 0.1
+
+            fig_res = go.Figure(go.Scattermap(
+                lat=residuals['latitude'], lon=residuals['longitude'], mode='markers',
+                marker=dict(
+                    size=10, color=residuals['residual'], colorscale='RdBu',
+                    cmin=-absolute_ceiling, cmax=absolute_ceiling, showscale=True, opacity=0.90,
+                    colorbar=dict(title=dict(text='Deviation', font=dict(color=COLORS['text'], size=10)),
+                                  tickfont=dict(color=COLORS['text'], size=9), thickness=12)
+                ),
+                hovertemplate="<b>Model Error: %{marker.color:.3f}</b><br>Observed: %{customdata[0]:.3f}<br>Estimated: %{customdata[1]:.3f}<extra></extra>",
+                customdata=residuals[['actual_NDVI', 'fitted_NDVI']].values if 'actual_NDVI' in residuals.columns else residuals[['NDVI', 'fitted_NDVI']].values
+            ))
+            fig_res.update_layout(
+                map=dict(style='dark', center=dict(lat=30.795, lon=76.352), zoom=10.5),
+                paper_bgcolor=COLORS['card'], margin=dict(l=0, r=0, t=0, b=0), height=500
+            )
+            right_map_plot = dcc.Graph(figure=fig_res, config={'displayModeBar': True})
+        else:
+            right_map_plot = html.Div("Awaiting execution pipeline compilation to populate deviation vectors.",
+                                      style={'color': COLORS['text_muted'], 'fontSize': '13px', 'padding': '40px 20px', 'textAlign': 'center'})
+
+        right_map_layout = html.Div([
+            html.Div("Residual Map — Satellite-Derived Model Deviation",
+                     style={'color': COLORS['text'], 'fontSize': '14px', 'fontWeight': '600', 'marginBottom': '4px'}),
+            html.Div("Blue = Performance advantage (Irrigation anomaly)  |  Red = Field boundary/Stress deficit",
+                     style={'color': COLORS['text_muted'], 'fontSize': '11px', 'marginBottom': '12px'}),
+            right_map_plot
+        ], style={**CARD_STYLE, 'flex': '1'})
+
+        maps_row = html.Div([left_map_layout, right_map_layout], style={'display': 'flex', 'marginBottom': '20px'})
+
+        return html.Div([header, disclaimer, heatmap_block, selectors_card, chart_container, maps_row])
+
     return html.Div('Tab not found')
 
 
@@ -1245,8 +1431,8 @@ def render_page(tab, n):
     Input('refresh','n_intervals')
 )
 def update_map(prop, n):
-    # load_all() returns 12 items — unpack all 12
-    _, grid, _, _, st, _, _, _, _, _, _, _ = load_all()
+    # Mandatory Unpack Target Verification: Exactly 14 mapping structures defined
+    _, grid, _, _, st, _, _, _, _, _, _, _, _, _ = load_all()
     s2_date = st.get('sentinel2_date','—')
 
     cmaps = {'pH':'RdYlGn_r','OC':'YlGn','EC':'OrRd','available_N':'Blues','available_P':'Purples',
@@ -1309,6 +1495,102 @@ def update_map(prop, n):
     return fig, stats
 
 
+# =========================================================================
+# INTERACTIVE SOIL-SATELLITE SCATTER DIAGNOSTIC CALLBACK
+# =========================================================================
+@callback(
+    Output('corr-scatter-chart', 'figure'),
+    Input('corr-soil-drop', 'value'),
+    Input('corr-spec-drop', 'value'),
+    Input('refresh', 'n_intervals'),
+    prevent_initial_call=False
+)
+def update_corr_scatter(soil_col, spec_col, n):
+    # Mandatory Unpack Target Verification: Exactly 14 mapping structures defined
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, residuals) = load_all()
+
+    # Establish fallback alerts if source arrays are missing
+    if residuals.empty:
+        fig = go.Figure()
+        fig.update_layout(
+            template='plotly_dark', paper_bgcolor=COLORS['card'], plot_bgcolor=COLORS['card'],
+            xaxis={'visible': False}, yaxis={'visible': False},
+            annotations=[dict(text="Please execute scripts/soil_spectral_correlation.py to parse validation points.",
+                              showarrow=False, font=dict(color=COLORS['text_muted'], size=13))]
+        )
+        return fig
+
+    if soil_col not in residuals.columns or spec_col not in residuals.columns:
+        fig = go.Figure()
+        fig.update_layout(
+            template='plotly_dark', paper_bgcolor=COLORS['card'], plot_bgcolor=COLORS['card'],
+            xaxis={'visible': False}, yaxis={'visible': False},
+            annotations=[dict(text="Selected variable matrix signature not found in target registry structure.",
+                              showarrow=False, font=dict(color=COLORS['text_muted'], size=13))]
+        )
+        return fig
+
+    clean_subset = residuals[[soil_col, spec_col]].dropna()
+    if len(clean_subset) < 5:
+        fig = go.Figure()
+        fig.update_layout(
+            template='plotly_dark', paper_bgcolor=COLORS['card'], plot_bgcolor=COLORS['card'],
+            xaxis={'visible': False}, yaxis={'visible': False},
+            annotations=[dict(text="Insufficient data footprints remaining after removing null rows.",
+                              showarrow=False, font=dict(color=COLORS['text_muted'], size=13))]
+        )
+        return fig
+
+    x_data = clean_subset[soil_col].values
+    y_data = clean_subset[spec_col].values
+
+    # Evaluate Spearman Rank significance
+    from scipy.stats import spearmanr
+    r_coefficient, p_significance = spearmanr(x_data, y_data)
+
+    # Derive Ordinary Least Squares trend line vector
+    regression_line_slope, intercept_constant = np.polyfit(x_data, y_data, 1)
+    x_regression_steps = np.linspace(x_data.min(), x_data.max(), 100)
+    y_regression_steps = np.polyval([regression_line_slope, intercept_constant], x_regression_steps)
+
+    fig = go.Figure()
+
+    # Inject point distribution array
+    fig.add_trace(go.Scatter(
+        x=x_data, y=y_data, mode='markers', name='Sample points',
+        marker=dict(color=COLORS['accent'], size=8, opacity=0.75,
+                    line=dict(color=COLORS['border'], width=0.5)),
+        hovertemplate=f"{soil_col.replace('_',' ').title()}: %{{x:.3f}}<br>{spec_col}: %{{y:.3f}}<extra></extra>"
+    ))
+
+    # Inject trendline overlay vector
+    fig.add_trace(go.Scatter(
+        x=x_regression_steps, y=y_regression_steps, mode='lines', name='Linear Trend',
+        line=dict(color=COLORS['warning'], width=2, dash='dash'),
+        showlegend=False
+    ))
+
+    # Display statistical matrix scorecard card within presentation block
+    fig.add_annotation(
+        xref='paper', yref='paper', x=0.02, y=0.96,
+        text=f"<b>Spearman R</b> = {r_coefficient:.3f}   |   <b>p-value</b> = {p_significance:.4e}   |   <b>n</b> = {len(x_data)}",
+        showarrow=False, font=dict(color=COLORS['accent'], size=11), align='left',
+        bgcolor='rgba(30,37,53,0.9)', bordercolor=COLORS['border'], borderwidth=1, borderpad=7
+    )
+
+    fig.update_layout(
+        template='plotly_dark', paper_bgcolor=COLORS['card'], plot_bgcolor=COLORS['card'],
+        height=360, margin=dict(l=60, r=30, t=50, b=60),
+        xaxis=dict(title=soil_col.replace('_', ' ').title(), gridcolor=COLORS['border'], tickfont=dict(color=COLORS['text_muted'], size=10)),
+        yaxis=dict(title=spec_col, gridcolor=COLORS['border'], tickfont=dict(color=COLORS['text_muted'], size=10)),
+        title=dict(text=f"Co-located Regression Profile: {soil_col.replace('_',' ').title()} vs {spec_col}",
+                   font=dict(size=13, color=COLORS['text'])),
+        showlegend=False
+    )
+
+    return fig
+
+
 # ============================================
 # CROP INDEX DROPDOWN CALLBACK
 # ============================================
@@ -1320,7 +1602,8 @@ def update_map(prop, n):
     prevent_initial_call=True
 )
 def update_crop_index(index_col, n):
-    (_, _, _, _, _, _, _, _, _, _, _, lulc_ndvi) = load_all()
+    # Mandatory Unpack Target Verification: Exactly 14 mapping structures defined
+    _, _, _, _, _, _, _, _, _, _, _, lulc_ndvi, _, _ = load_all()
     if lulc_ndvi.empty:
         return go.Figure()
 
