@@ -1,0 +1,43 @@
+# ── Google Cloud credentials (NEVER commit) ──────────────────
+optimum-archery-387602-53140a737c46.json
+*.service-account.json
+*.serviceaccount.json
+
+# ── Python cache ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual environments ──────────────────────────────────────
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# ── IDE / editor ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Local dev / Claude session files ─────────────────────────
+scripts/claude code/
+log_myself/
+tracking the changes/
+
+# ── Jupyter ───────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+C:/Temp/dash_*.txt

@@ -1,0 +1,49 @@
+======================================================================
+KHAMANON TRAINING POINTS — CLEAN VERSION FOR GEE
+======================================================================
+
+Total points: 138
+
+Class code legend:
+  1 = Wheat
+  2 = Spring_Maize
+  3 = Rice
+  4 = Kharif_Maize
+  5 = Agroforestry
+  6 = Other
+
+----------------------------------------------------------------------
+RABI 2025-26 (Wheat / Spring Maize / Agroforestry / Other)
+----------------------------------------------------------------------
+  Wheat          :  99 points  ( 71.7%)
+  Spring_Maize   :  23 points  ( 16.7%)
+  Other          :  15 points  ( 10.9%)
+  Agroforestry   :   1 points  (  0.7%)
+
+----------------------------------------------------------------------
+KHARIF 2025 (Rice / Kharif Maize / Agroforestry / Other)
+----------------------------------------------------------------------
+  Rice           :  86 points  ( 62.3%)
+  Kharif_Maize   :  38 points  ( 27.5%)
+  Other          :  13 points  (  9.4%)
+  Agroforestry   :   1 points  (  0.7%)
+
+----------------------------------------------------------------------
+CROSS-TAB — how each point changed across seasons
+----------------------------------------------------------------------
+kharif_class  Agroforestry  Kharif_Maize  Other  Rice  Total
+rabi_class                                                  
+Agroforestry             1             0      0     0      1
+Other                    0             9      2     4     15
+Spring_Maize             0            12      4     7     23
+Wheat                    0            17      7    75     99
+Total                    1            38     13    86    138
+
+======================================================================
+READY TO UPLOAD TO GEE AS:
+  training_points_clean_for_gee.csv
+
+Use this as the training asset for two GEE scripts:
+  • Khamanon_Rabi_2025_26_LULC   → uses 'rabi_code' as label
+  • Khamanon_Kharif_2025_LULC    → uses 'kharif_code' as label
+======================================================================

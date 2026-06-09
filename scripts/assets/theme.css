@@ -1,0 +1,323 @@
+/* ============================================
+   KHAMANON DIGITAL TWIN — Refined Data v5
+   Design: editorial precision, not cyberpunk
+   Ref: Bloomberg terminal × science dashboard
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Reset & Base ──────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: linear-gradient(160deg, #080818 0%, #0e0e24 60%, #12102e 100%) fixed !important;
+  background-attachment: fixed;
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+  min-height: 100vh;
+  /* No dot-grid pattern, clean gradient only */
+}
+
+/* ── Scrollbar ──────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+/* ── Earth bg (global hidden, overview only) ── */
+#earth-bg, #earth-overlay { display: none; }
+
+/* ── Overview: full-viewport Earth background (Hercules ref) ── */
+/* Break out of page-content padding so Earth fills edge-to-edge  */
+.overview-wrapper {
+  position: relative;
+  min-height: 100vh;
+  margin: -28px -32px;   /* undo page-content padding */
+  padding: 0;
+}
+
+/* Full-screen Earth image — covers entire viewport */
+.overview-earth-img {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/Earthbackground.jpg');
+  background-size: cover;
+  background-position: center center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Dark gradient overlay: pure black at very top → transparent by 55%
+   so space stays pitch-black and Earth shows in lower half            */
+.overview-earth-grad {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    #000000       0%,
+    #000000      20%,
+    rgba(0,0,0,0.80) 40%,
+    rgba(0,0,0,0.30) 65%,
+    transparent  100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* All content sits above the earth layers */
+.overview-wrapper > *:not(.overview-earth-img):not(.overview-earth-grad) {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── KPI cards: compact, centered, floating (Overview only) ── */
+.overview-kpi-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.overview-kpi-row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+/* Compact KPI card — smaller than full cards */
+.kpi-card-sm {
+  background: rgba(8, 10, 22, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 18px 22px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  min-width: 150px;
+  flex: 1;
+  max-width: 220px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  animation: fadeUp 0.4s ease forwards;
+  opacity: 0;
+}
+.kpi-card-sm:hover {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(12, 15, 32, 0.72);
+}
+.kpi-card-sm:nth-child(1) { animation-delay: 0.05s; }
+.kpi-card-sm:nth-child(2) { animation-delay: 0.10s; }
+.kpi-card-sm:nth-child(3) { animation-delay: 0.15s; }
+.kpi-card-sm:nth-child(4) { animation-delay: 0.20s; }
+.kpi-card-sm:nth-child(5) { animation-delay: 0.25s; }
+
+/* Climate section label over the earth zone */
+.climate-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+/* ── Cards ──────────────────────────────────── */
+.hud-card, .kpi-card {
+  background: rgba(22, 22, 58, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 24px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.hud-card:hover, .kpi-card:hover {
+  border-color: rgba(0, 212, 170, 0.18);
+  transform: translateY(-1px);
+}
+
+/* Card fade in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.kpi-card { animation: fadeUp 0.35s ease forwards; opacity: 0; }
+.kpi-card:nth-child(1) { animation-delay: 0.04s; }
+.kpi-card:nth-child(2) { animation-delay: 0.08s; }
+.kpi-card:nth-child(3) { animation-delay: 0.12s; }
+.kpi-card:nth-child(4) { animation-delay: 0.16s; }
+.kpi-card:nth-child(5) { animation-delay: 0.20s; }
+
+/* ── Section titles ─────────────────────────── */
+/* Clean, authoritative — no neon, no gradients  */
+.section-title {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px !important;
+  text-transform: none !important;
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-clip: unset !important;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+.section-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #5a6a8a;
+  letter-spacing: 0;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+/* ── Sticky header ──────────────────────────── */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(8, 10, 25, 0.94) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ── Pulse nodes ────────────────────────────── */
+.pulse-node {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.pulse-node-success {
+  background: #00d4aa;
+  animation: pulseDot 2.4s infinite;
+}
+.pulse-node-warning {
+  background: #ef4444;
+  animation: pulseDot 2.4s infinite;
+}
+@keyframes pulseDot {
+  0%   { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 1; box-shadow: 0 0 0 5px transparent; }
+}
+
+/* ── Tab strip ──────────────────────────────── */
+.tab--selected {
+  background: rgba(22,22,58,0.70) !important;
+  color: #00d4aa !important;
+}
+
+/* ── Plotly chart hover ─────────────────────── */
+.plotly .hoverlayer .hovertext {
+  backdrop-filter: blur(10px);
+  background: rgba(14,14,36,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 6px;
+}
+
+/* ── Advisory severity borders ─────────────── */
+.adv-card-critical { border-left: 2px solid #ef4444 !important; }
+.adv-card-warning  { border-left: 2px solid #ff8c42 !important; }
+.adv-card-info     { border-left: 2px solid rgba(0,212,170,0.6) !important; }
+.adv-card-ok       { border-left: 2px solid #00d4aa !important; }
+
+/* ── Dropdown overrides ─────────────────────── */
+.Select-control, .Select-control:hover {
+  background-color: rgba(22, 22, 58, 0.90) !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+}
+.Select-value-label { color: #ffffff !important; }
+.Select-placeholder  { color: #5a6a8a !important; }
+.Select-arrow-zone   { color: #5a6a8a !important; }
+
+/* Search box inside dropdown */
+.Select-search-box input, .Select--multi .Select-input input {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+.Select-search-box-wrapper .Select-search-box {
+  background: rgba(8,10,22,0.8) !important;
+}
+
+/* Dropdown menu: floats above Plotly charts */
+.Select-menu-outer {
+  background-color: #0e0e24 !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 8px !important;
+  z-index: 9999 !important;
+  position: absolute !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+.VirtualizedSelectOption {
+  color: #94a3b8 !important;
+  background-color: transparent !important;
+}
+.VirtualizedSelectOption:hover,
+.VirtualizedSelectFocusedOption {
+  background-color: rgba(0,212,170,0.10) !important;
+  color: #ffffff !important;
+}
+.VirtualizedSelectSelectedOption {
+  background-color: rgba(0,212,170,0.15) !important;
+  color: #00d4aa !important;
+  font-weight: 600 !important;
+}
+.Select.is-open { z-index: 9999 !important; }
+
+/* ── Loading shimmer ────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+._dash-loading-spinner {
+  background: linear-gradient(90deg, #0e0e24 25%, #16163a 50%, #0e0e24 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 8px;
+}
+
+/* ── Non-overview tabs get standard padding ─── */
+.tab-content-pad {
+  padding: 28px 32px;
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 900px) {
+  .kpi-card  { padding: 18px; }
+  .section-title { font-size: 18px !important; }
+}
+
+/* Legacy class aliases kept for backward compat — no visual effect */
+.terminal-num       { font-family: 'Inter', sans-serif; font-weight: 700; }
+.phosphor-glow      {}
+.danger-glow        {}
+.magenta-glow       {}
+.warn-glow          {}
+.success-glow       {}
+.bracket-header     { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500;
+                      text-transform: uppercase; letter-spacing: 0.8px; color: #5a6a8a; margin-bottom: 12px; }
+.telemetry-ribbon   {}
+.telemetry-label    { color: #334155; font-size: 9px; font-weight: 600; text-transform: uppercase;
+                      letter-spacing: 0.8px; margin: 0 6px 0 14px; }
+.telemetry-value    { color: #5a6a8a; }
+.telemetry-value-accent { color: #00d4aa; font-weight: 600; }
+.telemetry-value-purple { color: #00d4aa; font-weight: 600; }

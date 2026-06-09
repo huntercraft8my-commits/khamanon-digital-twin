@@ -1,0 +1,3 @@
+rule_id,type,severity,message,action
+R17,Organic Matter,INFO,ℹ️ Low Organic Matter — FYM Recommended.,Apply 50-100 kg/acre well-rotted Farmyard Manure (FYM) before sowing. Combine with chemical fertilizers for best soil health. Consider incorporating rice straw/crop residue to improve OC over seasons. OC detected: 0.412%
+R14,Crop Stress,WARNING,⚠️ Crop Stress Detected via Satellite.,"Probable causes: moisture deficit, nutrient deficiency, or pest pressure. Check field conditions. Consider irrigation and supplementary soil testing. NDVI: 0.246 (threshold: 0.35)"

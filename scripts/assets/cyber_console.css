@@ -1,0 +1,192 @@
+/* ==========================================================================
+   KHAMANON DIGITAL TWIN — SCIENTIFIC CONSOLE UI
+   assets/cyber_console.css
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap');
+
+/* ── Base Canvas ─────────────────────────────────────────────────────────── */
+body {
+    font-family: 'Inter', -apple-system, Segoe UI, sans-serif !important;
+    background-color: #0b0f19 !important;
+    /* Faint teal geometric instrument grid */
+    background-image:
+        linear-gradient(rgba(0, 212, 170, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 170, 0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 5px; height: 5px; }
+::-webkit-scrollbar-track    { background: #0b0f19; }
+::-webkit-scrollbar-thumb    { background: #1f293d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 170, 0.3); }
+
+/* ── HUD Card — chamfered top-right and bottom-left corners ──────────────── */
+.hud-card {
+    position: relative;
+    clip-path: polygon(
+        0%              0%,
+        calc(100% - 13px) 0%,
+        100%            13px,
+        100%            100%,
+        13px            100%,
+        0%              calc(100% - 13px)
+    );
+}
+
+/* Top accent stripe — clipped by the chamfer, so its corner cuts diagonally.
+   This is intentional; it follows the card geometry precisely. */
+.hud-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--accent, #00d4aa);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Hover: filter-based glow so it follows the clip-path outline */
+.hud-card:hover {
+    border-color: var(--accent, #00d4aa) !important;
+    filter: drop-shadow(0 0 12px rgba(0, 212, 170, 0.13));
+    transition: filter 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── Bracket Header ──────────────────────────────────────────────────────── */
+/* Used for KPI card labels: uppercase Rajdhani with teal left-border accent */
+.bracket-header {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: #94a3b8;
+    padding-left: 7px;
+    border-left: 2px solid var(--accent, #00d4aa);
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+/* ── Terminal Numbers ────────────────────────────────────────────────────── */
+/* JetBrains Mono for all numeric telemetry values */
+.terminal-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* ── Phosphor Glow Variants ──────────────────────────────────────────────── */
+.phosphor-glow { text-shadow: 0 0 14px rgba(  0, 212, 170, 0.45); }
+.magenta-glow  { text-shadow: 0 0 14px rgba(124,  92, 191, 0.50); }
+.warn-glow     { text-shadow: 0 0 14px rgba(245, 158,  11, 0.45); }
+.danger-glow   { text-shadow: 0 0 14px rgba(239,  68,  68, 0.45); }
+.success-glow  { text-shadow: 0 0 14px rgba( 16, 185, 129, 0.45); }
+
+/* ── Pulsing Status Nodes ────────────────────────────────────────────────── */
+.pulse-node {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.pulse-node-success {
+    background-color: #10b981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+    animation: pulse-success 2.2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+.pulse-node-warning {
+    background-color: #f59e0b;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55);
+    animation: pulse-warning 2.2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+.pulse-node-danger {
+    background-color: #ef4444;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+    animation: pulse-danger 2.2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes pulse-success {
+    to { box-shadow: 0 0 0 9px rgba( 16, 185, 129, 0); }
+}
+@keyframes pulse-warning {
+    to { box-shadow: 0 0 0 9px rgba(245, 158,  11, 0); }
+}
+@keyframes pulse-danger {
+    to { box-shadow: 0 0 0 9px rgba(239,  68,  68, 0); }
+}
+
+/* ── Section Titles ──────────────────────────────────────────────────────── */
+.section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    font-size: 22px;
+    color: #f1f5f9;
+    line-height: 1.2;
+}
+
+.section-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #94a3b8;
+    letter-spacing: 0.3px;
+    margin-top: 3px;
+    margin-bottom: 20px;
+}
+
+/* ── Telemetry Ribbon ────────────────────────────────────────────────────── */
+.telemetry-ribbon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.telemetry-label { color: #4a5568; margin-right: 4px; }
+.telemetry-value { color: #94a3b8; margin-right: 28px; }
+.telemetry-value-accent { color: #00d4aa; margin-right: 28px; }
+.telemetry-value-purple { color: #7c5cbf; margin-right: 28px; }
+
+/* ── Satellite Log Table ─────────────────────────────────────────────────── */
+.sat-log-table { width: 100%; border-collapse: collapse; }
+.sat-log-table tr:hover td {
+    background-color: rgba(0, 212, 170, 0.04) !important;
+    transition: background-color 0.15s ease;
+}
+
+/* ── Risk Progress Bars ──────────────────────────────────────────────────── */
+/* Angled track ends for sci-fi feel */
+.risk-track {
+    height: 7px;
+    overflow: hidden;
+    background-color: #1f293d;
+    flex: 1;
+    margin-right: 12px;
+    clip-path: polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%);
+}
+
+/* ── Advisory Cards ──────────────────────────────────────────────────────── */
+.adv-severity-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ── Tab Bar ─────────────────────────────────────────────────────────────── */
+/* Override Dash default blue border on tab container */
+.dash-tabs-content { border: none !important; }

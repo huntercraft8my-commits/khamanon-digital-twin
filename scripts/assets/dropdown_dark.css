@@ -1,0 +1,58 @@
+/* Override Dash dropdown for dark theme */
+.Select-control {
+    background-color: #1e2535 !important;
+    border: 1px solid #2d3748 !important;
+    color: #f1f5f9 !important;
+}
+
+.Select-value-label,
+.Select-placeholder,
+.Select-input > input {
+    color: #f1f5f9 !important;
+}
+
+.Select-menu-outer {
+    background-color: #1e2535 !important;
+    border: 1px solid #2d3748 !important;
+    z-index: 9999 !important;
+    position: relative !important;
+}
+/* Dash 4.x / React-Select v5 menu portal */
+[class$="__menu"],
+[class*="-menu"] {
+    z-index: 9999 !important;
+}
+[class$="__menu-list"],
+[class*="-menu-list"] {
+    z-index: 9999 !important;
+}
+
+.Select-option {
+    background-color: #1e2535 !important;
+    color: #f1f5f9 !important;
+}
+
+.Select-option.is-focused,
+.Select-option:hover {
+    background-color: #252b3b !important;
+    color: #00d4aa !important;
+}
+
+.Select-option.is-selected {
+    background-color: #2d3748 !important;
+    color: #00d4aa !important;
+}
+
+.Select-arrow {
+    border-color: #94a3b8 transparent transparent !important;
+}
+
+.is-open .Select-arrow {
+    border-color: transparent transparent #94a3b8 !important;
+}
+
+.Select.is-focused > .Select-control {
+    background-color: #1e2535 !important;
+    border-color: #00d4aa !important;
+    box-shadow: 0 0 0 1px #00d4aa !important;
+}
