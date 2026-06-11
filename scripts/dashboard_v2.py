@@ -843,7 +843,7 @@ def render_page(tab, n, sat_open=False):
                     'color':'#ffffff','letterSpacing':'-1px','textAlign':'center',
                     'marginBottom':'4px','lineHeight':'1.1',
                 }),
-                html.Div(f"Updated {pd.Timestamp.now().strftime('%d %b %Y  %H:%M')}", style={
+                html.Div(f"Updated {st.get('last_run', 'Never')}", style={
                     'fontFamily':'Inter, sans-serif','fontSize':'12px','fontWeight':'400',
                     'color':'rgba(255,255,255,0.30)','textAlign':'center','marginBottom':'40px',
                 }),
@@ -2513,6 +2513,13 @@ def _update_corr_scatter_inner(soil_col, spec_col, n):
 )
 def toggle_sat_log(n_clicks, current):
     return not (current or False)
+
+@callback(
+    Output('sat-log-body', 'style'),
+    Input('sat-log-open', 'data'),
+)
+def show_sat_log(is_open):
+    return {'display': 'block' if is_open else 'none', 'marginTop': '14px'}
 
 @callback(
     Output('crop-index-chart','figure'),
