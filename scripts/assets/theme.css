@@ -300,10 +300,109 @@ body {
   padding: 28px 32px;
 }
 
-/* ── Responsive ─────────────────────────────── */
+/* ── Responsive — tablet ────────────────────── */
 @media (max-width: 900px) {
   .kpi-card  { padding: 18px; }
   .section-title { font-size: 18px !important; }
+}
+
+/* ── Responsive — mobile ────────────────────── */
+@media (max-width: 768px) {
+
+  /* Page-level padding — overrides inline style */
+  #page-content {
+    padding: 14px 14px !important;
+  }
+
+  /* Overview Earth wrapper — must match page padding offset */
+  .overview-wrapper {
+    margin: -14px -14px !important;
+  }
+
+  /* ── Tab bar: horizontal scroll instead of overflow ── */
+  #tabs > div:first-child,
+  .dash-tab-strip {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;        /* Firefox */
+  }
+  #tabs > div:first-child::-webkit-scrollbar { display: none; }
+
+  /* Shrink individual tab padding & font */
+  .dash-tab, [class*="tab--"] {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  /* ── Sticky header ──────────────────────────── */
+  .sticky-header {
+    padding: 8px 14px !important;
+  }
+  /* Stack logo + status vertically if needed */
+  .sticky-header > div {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+
+  /* ── Cards ──────────────────────────────────── */
+  .hud-card, .kpi-card {
+    padding: 14px !important;
+  }
+  .kpi-card-sm {
+    min-width: 130px !important;
+    max-width: 48% !important;
+    flex: 1 1 130px !important;
+    padding: 14px 16px !important;
+  }
+  .overview-kpi-container {
+    padding: 0 8px !important;
+  }
+  .overview-kpi-row {
+    gap: 8px !important;
+  }
+
+  /* ── Risk panel two-column → single column ── */
+  .risk-flex-row {
+    flex-direction: column !important;
+  }
+  .risk-flex-row > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    border-left: none !important;
+    margin-top: 16px;
+  }
+  .risk-flex-row > div:first-child {
+    margin-top: 0;
+  }
+
+  /* ── Tables: horizontal scroll ─────────────── */
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  /* ── Charts: prevent overflow ───────────────── */
+  .js-plotly-plot, .plotly-graph-div {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* ── Section padding ────────────────────────── */
+  .tab-content-pad {
+    padding: 14px !important;
+  }
+
+  /* ── Satellite log action text: allow wrapping ── */
+  #sat-log-body td {
+    white-space: normal !important;
+    font-size: 11px !important;
+  }
 }
 
 /* Legacy class aliases kept for backward compat — no visual effect */

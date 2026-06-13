@@ -1,0 +1,77 @@
+name: Daily Khamanon Pipeline
+
+# Runs realtime_updater.py on GitHub's runners, commits the refreshed data
+# files back to the repo, and that push triggers Render's auto-deploy.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   GEE_CREDENTIALS  – full contents of the GCP service-account JSON key
+#                      (the SA must belong to project optimum-archery-387602
+#                       and have Earth Engine access enabled)
+#   OWM_KEY          – OpenWeatherMap API key
+
+on:
+  schedule:
+    # 02:00 UTC ≈ 07:30 IST. NOTE: GitHub cron is best-effort and may be
+    # delayed by minutes to an hour, or skipped under load — this is "once a
+    # day", not literally real-time. Sentinel-2 revisit is ~5 days anyway.
+    - cron: "0 2 * * *"
+  workflow_dispatch: {}   # manual "Run workflow" button
+
+# Never let two runs push at once.
+concurrency:
+  group: daily-pipeline
+  cancel-in-progress: false
+
+# Allow the job to push commits back to the repo.
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run real-time updater
+        env:
+          GEE_CREDENTIALS: ${{ secrets.GEE_CREDENTIALS }}
+          OWM_KEY: ${{ secrets.OWM_KEY }}
+        run: python scripts/realtime_updater.py
+
+      - name: Commit refreshed data (only if changed)
+        run: |
+          git config user.name  "khamanon-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Scope the add to the pipeline outputs ONLY — never re-add the
+          # large .tif rasters, to keep git history from ballooning.
+          git add -- \
+            data/last_update.json \
+            data/real_prediction_grid.csv \
+            data/satellite_log.csv \
+            data/ndvi_processed.csv \
+            data/point_risk_scores.csv \
+            data/grid_risk_scores.csv \
+            data/current_weather.json
+
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "Auto: daily pipeline refresh $(date -u +'%Y-%m-%d %H:%M UTC')"
+          # Rebase on top of any manual pushes that landed since checkout.
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

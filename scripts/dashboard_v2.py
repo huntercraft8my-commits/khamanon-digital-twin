@@ -411,7 +411,14 @@ def _build_lulc_map(base_path):
 # ============================================
 
 _lulc_map_cache = _build_lulc_map(base)
-app = Dash(__name__, suppress_callback_exceptions=True)
+app = Dash(
+    __name__,
+    suppress_callback_exceptions=True,
+    meta_tags=[{
+        'name'   : 'viewport',
+        'content': 'width=device-width, initial-scale=1, maximum-scale=5'
+    }]
+)
 
 
 # ============================================
@@ -441,14 +448,21 @@ def _run_updater_job():
     except Exception as e:
         print(f"[Scheduler] Error: {e}")
 
-_scheduler = BackgroundScheduler(job_defaults={'max_instances':1,'misfire_grace_time':3600})
-_scheduler.add_job(
-    _run_updater_job, trigger='interval', hours=24, id='daily_pipeline',
-    next_run_time=datetime.now() + timedelta(minutes=3)
-)
-_scheduler.start()
-atexit.register(lambda: _scheduler.shutdown(wait=False))
-print("[Scheduler] Started — first run in 3min, then every 24h")
+# The pipeline now runs in GitHub Actions (see .github/workflows/daily-update.yml),
+# which commits refreshed data back to the repo and triggers a Render redeploy.
+# The in-app scheduler is disabled by default because the web dyno's filesystem is
+# ephemeral (writes are wiped on restart) — set ENABLE_INAPP_SCHEDULER=1 to force it on.
+if os.environ.get('ENABLE_INAPP_SCHEDULER') == '1':
+    _scheduler = BackgroundScheduler(job_defaults={'max_instances':1,'misfire_grace_time':3600})
+    _scheduler.add_job(
+        _run_updater_job, trigger='interval', hours=24, id='daily_pipeline',
+        next_run_time=datetime.now() + timedelta(minutes=3)
+    )
+    _scheduler.start()
+    atexit.register(lambda: _scheduler.shutdown(wait=False))
+    print("[Scheduler] Started — first run in 3min, then every 24h")
+else:
+    print("[Scheduler] In-app scheduler disabled — pipeline runs via GitHub Actions")
 
 
 # ============================================
@@ -996,7 +1010,7 @@ def render_page(tab, n, sat_open=False):
                     'flex':'1','minWidth':'0','paddingLeft':'20px',
                     'borderLeft':'1px solid rgba(255,255,255,0.08)',
                 }),
-            ], style={'display':'flex','alignItems':'flex-start','gap':'0'}),
+            ], style={'display':'flex','alignItems':'flex-start','gap':'0'}, className='risk-flex-row'),
         ], style={**CARD_STYLE, 'marginBottom': '20px'})
 
         # SECTION B — PAU Advisory

@@ -618,8 +618,9 @@ import os as _os
 import json as _json
 
 def _fetch_weather():
-    # paste your alphanumeric API key inside the quotes below
-    OWM_KEY = "aad8b57ba2b85482fa8be2bbbed79489" 
+    # Read from env (GitHub Secret / Render env var); fall back to local literal.
+    # NOTE: the literal below is already public in git history — rotate it.
+    OWM_KEY = _os.environ.get("OWM_KEY", "aad8b57ba2b85482fa8be2bbbed79489")
     
     url = (
         "https://api.openweathermap.org/data/2.5/weather"
