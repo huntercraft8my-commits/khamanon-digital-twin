@@ -2,7 +2,7 @@ dash==4.1.0
 plotly==6.7.0
 pandas>=2.0
 numpy>=1.24
-scikit-learn>=1.3
+scikit-learn==1.8.0   # pinned: rf_real_*.pkl were trained on 1.8.0; must match to unpickle
 scipy>=1.11
 joblib>=1.3
 gunicorn>=21.2
