@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: khamanon-digital-twin
+    name: khamanon-dss
     env: python
     region: singapore           # closest to Punjab/India
     plan: free

@@ -1,5 +1,5 @@
 # ============================================
-# DIGITAL TWIN - KHAMANON BLOCK
+# DSS - KHAMANON BLOCK
 # Script 10: Real-Time Dashboard
 # Shows last update time + live status
 # ============================================
@@ -112,7 +112,7 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             html.H1(
-                'Digital Twin — Khamanon Block',
+                'DSS — Khamanon Block',
                 style={'color':'white','margin':'0',
                        'fontSize':'24px',
                        'fontWeight':'bold'}
@@ -830,7 +830,7 @@ def update_map(prop, n):
 
 if __name__ == '__main__':
     print("\n" + "=" * 55)
-    print("  REAL-TIME DIGITAL TWIN DASHBOARD")
+    print("  REAL-TIME DSS DASHBOARD")
     print("=" * 55)
     print("\nOpen browser and go to:")
     print("  http://127.0.0.1:8050")

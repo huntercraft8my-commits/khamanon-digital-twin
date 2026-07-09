@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ============================================
-# DIGITAL TWIN - KHAMANON BLOCK
+# DSS - KHAMANON BLOCK
 # Dashboard v2.0 — Professional Redesign
 # ============================================
 
@@ -24,7 +24,7 @@ import time
 
 print("=" * 55)
 print("  DASHBOARD v2.0 — PROFESSIONAL REDESIGN")
-print("  Khamanon Block Digital Twin")
+print("  Khamanon Block DSS")
 print("=" * 55)
 
 base = os.path.dirname(os.path.abspath(__file__))
@@ -419,6 +419,7 @@ app = Dash(
         'content': 'width=device-width, initial-scale=1, maximum-scale=5'
     }]
 )
+app.title = 'Khamanon DSS'
 
 
 # ============================================
@@ -494,7 +495,7 @@ app.layout = html.Div([
                         'fontFamily' : 'Inter, sans-serif',
                         'letterSpacing': '-0.3px',
                     }),
-                    html.Span('Digital Twin', style={
+                    html.Span('Decision Support System', style={
                         'color'      : COLORS['accent'],
                         'fontSize'   : '16px',
                         'fontWeight' : '400',
@@ -847,7 +848,7 @@ def render_page(tab, n, sat_open=False):
 
             # Hero content — centered, floats in the dark upper zone
             html.Div([
-                html.Div('Khamanon Digital Twin', style={
+                html.Div('Khamanon DSS', style={
                     'fontFamily':'Inter, sans-serif','fontSize':'13px','fontWeight':'400',
                     'color':'rgba(255,255,255,0.35)','textTransform':'uppercase',
                     'letterSpacing':'3px','marginBottom':'6px','textAlign':'center',
@@ -2588,7 +2589,7 @@ server = app.server  # required for Render/gunicorn
 
 if __name__ == '__main__':
     print("\n" + "=" * 55)
-    print("  KHAMANON DIGITAL TWIN v2.0")
+    print("  KHAMANON DSS v2.0")
     print("=" * 55)
     print("\nOpen browser: http://127.0.0.1:8050")
     print("Press Ctrl+C to stop.")

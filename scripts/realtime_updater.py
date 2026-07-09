@@ -1,5 +1,5 @@
 # ============================================
-# DIGITAL TWIN - KHAMANON BLOCK
+# DSS - KHAMANON BLOCK
 # Script 9: Real-Time Auto Updater
 # Connects to GEE, gets latest Sentinel-2,
 # reruns RF models, updates predictions

@@ -1,4 +1,6 @@
 # ── Google Cloud credentials (NEVER commit) ──────────────────
+keys/
+optimum-archery-387602-*.json
 optimum-archery-387602-53140a737c46.json
 *.service-account.json
 *.serviceaccount.json

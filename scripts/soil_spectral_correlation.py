@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Khamanon Block Digital Twin - Soil-Satellite Correlation Engine
+Khamanon Block DSS - Soil-Satellite Correlation Engine
 Resolves Crop-Type Mixing and Boundary Noise via cKDTree Spatial Alignment
 """
 
