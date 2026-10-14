@@ -1,9 +1,9 @@
 {
-  "last_run": "2026-10-13 09:08:38",
-  "sentinel2_date": "2026-10-10",
-  "images_used": 262,
-  "ndvi_mean": 0.5518,
-  "ndbi_mean": -0.1984,
+  "last_run": "2026-10-14 07:18:33",
+  "sentinel2_date": "2026-10-13",
+  "images_used": 264,
+  "ndvi_mean": 0.5381,
+  "ndbi_mean": -0.1899,
   "alerts": [],
   "status": "SUCCESS"
 }
